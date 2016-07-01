@@ -1,0 +1,15 @@
+ClueHelper Ideas:
+
+Main Purpose:
+
+A program that keeps track of every detail you know about every player in the game and helps
+you narrow down possibilities for what's in the envelope and make strategic rumors/accusations.
+
+Structure:
+
+- A player class to hold info for a given player (human)
+- a person card class, weapon card class, and room card class
+- a running console interaction with user that follows course of game and allows user
+  to enter bits of information to update game account
+
+Console Options:
