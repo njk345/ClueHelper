@@ -1,7 +1,6 @@
 /**
  * Created by njk on 7/1/16.
  */
-import java.util.*;
 public class Card {
     private String name;
     private Type type;

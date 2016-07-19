@@ -4,6 +4,7 @@
 import java.util.*;
 public class User {
     private ArrayList<Card> hand;
+    private ScoreCard scoreCard;
     private String name;
     public User(String name) {
         this.name = name;
