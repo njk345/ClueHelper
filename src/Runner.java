@@ -70,11 +70,11 @@ public class Runner {
             int choice = scanInt();
             switch (choice) {
                 case 1: //Register Rumor
-                    
+
                     break;
                 case 2: //Check My Score Card
                     break;
-                case 3: //Check An Opponent's Score Card
+                case 3: //Check My Idea of An Opponent's Score Card
                     break;
                 case 4: //Eval Accusation Probability
                     break;
@@ -85,7 +85,8 @@ public class Runner {
                 case 7: //End Game and Output Score Card
                     break;
                 default:
-                    System.out.println("Invalid Choice");
+                    System.out.println();
+                    System.out.println("!!Invalid Choice!!");
             }
             gap();
         }

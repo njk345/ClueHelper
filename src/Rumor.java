@@ -3,4 +3,7 @@
  */
 public class Rumor {
 
+    public Rumor() {
+
+    }
 }
