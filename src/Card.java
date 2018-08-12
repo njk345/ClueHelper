@@ -3,26 +3,24 @@
  */
 public class Card {
     private String name;
-    private Type type;
-    public enum Type {
-        WEAPON, PERSON, ROOM
-    }
-    public Card(Type type, String name) {
+
+    public Card(String name) {
         this.name = name;
-        this.type = type;
     }
-    public Type getType() {
-        return this.type;
-    }
+
     public String getName() {
         return this.name;
     }
+
+    @Override
     public String toString() {
         return getName();
     }
+
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Card) {
-            return ((Card)o).getName().equals(this.getName());
+            return ((Card) o).getName().equals(this.getName());
         }
         return false;
     }
