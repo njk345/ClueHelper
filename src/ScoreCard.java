@@ -59,20 +59,31 @@ public class ScoreCard {
         rv += "People:\n";
         for (String p : Runner.PERSON_NAMES) {
             rv += p + "  ";
-            rv += displayBool(vals.get(p).get(Runner.yourName));
+            rv += displayBool(vals.get(p).get(Runner.yourName)) + " ";
             for (String s : Runner.otherNames) {
-
+                rv += displayBool(vals.get(p).get(s)) + " ";
             }
+            rv += "\n";
         }
 
         rv += "Weapons:\n";
         for (String w : Runner.WEAPON_NAMES) {
-
+            rv += w + "  ";
+            rv += displayBool(vals.get(w).get(Runner.yourName)) + " ";
+            for (String s : Runner.otherNames) {
+                rv += displayBool(vals.get(w).get(s)) + " ";
+            }
+            rv += "\n";
         }
 
         rv += "Rooms:\n";
         for (String r : Runner.ROOM_NAMES) {
-
+            rv += r + "  ";
+            rv += displayBool(vals.get(r).get(Runner.yourName)) + " ";
+            for (String s : Runner.otherNames) {
+                rv += displayBool(vals.get(r).get(s)) + " ";
+            }
+            rv += "\n";
         }
 
         return "";
