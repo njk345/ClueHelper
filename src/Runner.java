@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -11,69 +13,93 @@ public class Runner {
     static final String[] CONSOLE_OPTIONS = {"Register Rumor", "Print My Score Card", "Print An Opponent's Score Card",
             "Calculate Accusation Probability", "Suggest Useful Rumor", "Print Score Card to File", "End Game & Print Score Card to File"};
     static final Scanner SCAN = new Scanner(System.in);
-    static String yourName;
-    static String[] otherNames;
+
+    static String p1Name;
+    static ArrayList<String> otherNames;
 
     public static void main(String[] args) {
-        System.out.println("Welcome to ClueHelper!");
-        System.out.print("How Many Players are Present (2-6)? ");
+        System.out.println("Welcome to ClueHelper!\n");
+        System.out.print("How many players are present (2-6)? ");
         int numPlayers = -1;
-        while (numPlayers == -1 || numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS) {
+        while (numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS) {
             try {
                 numPlayers = scanInt();
+                if (numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS) {
+                    System.out.print("Invalid number of players: ");
+                    SCAN.nextLine();
+                }
             } catch (InputMismatchException ime) {
                 numPlayers = -1;
-                System.out.print("Invalid Input - Try Again: ");
-                SCAN.nextLine();
-            }
-            if (numPlayers != -1 && (numPlayers < MIN_PLAYERS || numPlayers > MAX_PLAYERS)) {
-                System.out.print("Invalid Number of Players — Try Again: ");
+                System.out.print("Please enter a number: ");
                 SCAN.nextLine();
             }
         }
         SCAN.nextLine();
 
-        System.out.print("Enter Your Own Name: ");
-        yourName = SCAN.nextLine();
-        User you = new User(yourName);
+        System.out.print("Enter Your Name: ");
+        p1Name = SCAN.nextLine().replaceAll("\\s", "");
+        if (p1Name.isEmpty()) {
+            p1Name = "You";
+        }
 
-        otherNames = new String[numPlayers - 1];
-        for (int i = 0; i < otherNames.length; i++) {
+        User p1 = new User(p1Name);
+
+        otherNames = new ArrayList<>();
+        for (int i = 0; i < numPlayers - 1; i++) {
             System.out.print("Enter Player " + (i + 2) + "'s Name: ");
-            otherNames[i] = SCAN.nextLine();
+            String name = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+            if (name.isEmpty()) {
+                name = "Player " + (i + 2);
+            }
+            otherNames.add(name);
         }
 
-        User[] opponents = new User[otherNames.length];
+        User[] opponents = new User[otherNames.size()];
+
         for (int i = 0; i < opponents.length; i++) {
-            opponents[i] = new User(otherNames[i]);
+            opponents[i] = new User(otherNames.get(i));
+        }
+
+        p1.buildScoreCard();
+        for (User p : opponents) {
+            p.buildScoreCard();
         }
 
         gap();
 
-        System.out.println("Select Which Person Cards You Have (Enter Numbers Comma Separated): ");
-        printArray(PERSON_NAMES);
-        int[] personIndices = scanIntSelections();
-        for (int i : personIndices) {
-            you.addCard(PERSON_NAMES[i - 1]);
+        int[] personIndices = null;
+        while (personIndices == null) {
+            System.out.println("Select Which Person Cards You Have (Enter Numbers Comma Separated): ");
+            printArray(PERSON_NAMES);
+            personIndices = scanIntSelections(PERSON_NAMES.length);
         }
+        ArrayList<>
 
         gap();
 
-        System.out.println("Select Which Weapon Cards You Have (Enter Numbers Comma Separated): ");
-        printArray(WEAPON_NAMES);
-        int[] weaponIndices = scanIntSelections();
+        int[] weaponIndices = null;
+        while (weaponIndices == null) {
+            System.out.println("Select Which Weapon Cards You Have (Enter Numbers Comma Separated): ");
+            printArray(WEAPON_NAMES);
+            weaponIndices = scanIntSelections(WEAPON_NAMES.length);
+        }
         for (int i : weaponIndices) {
-            you.addCard(WEAPON_NAMES[i - 1]);
+            p1.addCard(WEAPON_NAMES[i - 1]);
         }
 
         gap();
 
-        System.out.println("Select Which Room Cards You Have (Enter Numbers Comma Separated): ");
-        printArray(ROOM_NAMES);
-        int[] roomIndices = scanIntSelections();
-        for (int i : roomIndices) {
-            you.addCard(ROOM_NAMES[i - 1]);
+        int[] roomIndices = null;
+        while (roomIndices == null) {
+            System.out.println("Select Which Room Cards You Have (Enter Numbers Comma Separated): ");
+            printArray(ROOM_NAMES);
+            roomIndices = scanIntSelections(ROOM_NAMES.length);
         }
+        for (int i : roomIndices) {
+            p1.addCard(ROOM_NAMES[i - 1]);
+        }
+
+
 
         gap();
 
@@ -82,10 +108,80 @@ public class Runner {
             printConsoleOptions();
             try {
                 int choice = scanInt();
+                gap();
+                SCAN.nextLine();
                 switch (choice) {
                     case 1: //Register Rumor
+                        String person = null;
+                        while (person == null) {
+                            System.out.print("Enter rumored person: ");
+                            person = SCAN.nextLine();
+                            if (!Arrays.asList(PERSON_NAMES).contains(person)) {
+                                person = null;
+                            }
+                        }
+                        gap();
+
+                        String weapon = null;
+                        while (weapon == null) {
+                            System.out.print("Enter rumored weapon: ");
+                            weapon = SCAN.nextLine();
+                            if (!Arrays.asList(WEAPON_NAMES).contains(weapon)) {
+                                weapon = null;
+                            }
+                        }
+                        gap();
+
+                        String room = null;
+                        while (room == null) {
+                            System.out.print("Enter rumored room: ");
+                            room = SCAN.nextLine();
+                            if (!Arrays.asList(ROOM_NAMES).contains(room)) {
+                                room = null;
+                            }
+                        }
+                        gap();
+
+                        String[] ndpNames = null;
+                        while (ndpNames == null) {
+                            System.out.print("Who could not disprove rumor (comma-sep, if any)? ");
+                            ndpNames = scanNames();
+                        }
+
+                        System.out.print("Did someone disprove the rumor (y/n)? ");
+                        boolean d = SCAN.nextLine().replaceAll("\\s", "").toLowerCase().equals("y");
+
+                        String[] disproval = null;
+                        if (d) {
+                            disproval = new String[2];
+                            String dpName = null;
+                            while (dpName == null) {
+                                System.out.print("Who disproved the rumor? ");
+                                dpName = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+                                if (!otherNames.contains(dpName)) {
+                                    dpName = null;
+                                }
+                            }
+                            String dpCard = null;
+                            while (dpCard == null) {
+                                System.out.print("Enter name of card to disprove: ");
+                                dpCard = SCAN.nextLine().replaceAll("\\s", "");
+                                if (!Arrays.asList(PERSON_NAMES).contains(dpCard) && !Arrays.asList(WEAPON_NAMES).contains(dpCard)
+                                        && !Arrays.asList(ROOM_NAMES).contains(dpCard)) {
+                                    dpCard = null;
+                                }
+                            }
+                            disproval[0] = dpName;
+                            disproval[1] = dpCard;
+                        }
+                        Rumor rumor = new Rumor(person, weapon, room, ndpNames, disproval);
+                        p1.noteRumor(rumor);
+                        for (User p : opponents) {
+                            p.noteRumor(rumor);
+                        }
                         break;
                     case 2: //Check My Score Card
+                        p1.printScoreCard();
                         break;
                     case 3: //Check My Idea of An Opponent's Score Card
                         break;
@@ -131,13 +227,36 @@ public class Runner {
         return i;
     }
 
-    private static int[] scanIntSelections() {
+    private static String[] scanNames() {
+        String nameStr = SCAN.nextLine().replaceAll("\\s", "");
+        String[] names = nameStr.split(",");
+        System.out.println(otherNames);
+        System.out.println(Arrays.toString(names));
+        for (String n : names) {
+            if (!otherNames.contains(n.toLowerCase())) {
+                System.out.println("Invalid name!");
+                return null;
+            }
+        }
+        return names;
+    }
+
+    private static int[] scanIntSelections(int numChoices) {
         System.out.print("Selections: ");
-        String selections = SCAN.nextLine();
-        String[] sSplit = selections.split(",");
+        String selections = SCAN.nextLine().replaceAll("\\s", ""); // remove whitespace
+        String[] sSplit = selections.split(","); // separate numbers between commas
         int[] indices = new int[sSplit.length];
         for (int i = 0; i < sSplit.length; i++) {
-            indices[i] = Integer.parseInt(sSplit[i].trim());
+            if (!sSplit[i].matches("^[0-9]+$")) { // invalid if choice contains non-numbers
+                System.out.println("\nInvalid Input!\n");
+                return null;
+            }
+            int index = Integer.parseInt(sSplit[i]);
+            if (index < 1 || index > numChoices) { // invalid if choice is not in [1, numChoices]
+                System.out.println("\nInvalid Input!\n");
+                return null;
+            }
+            indices[i] = index;
         }
         return indices;
     }

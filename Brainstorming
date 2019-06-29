@@ -7,14 +7,14 @@ you narrow down possibilities for what's in the envelope and make strategic rumo
 
 Structure:
 
-- A player class to hold info for a given player (human)
+- A player class to hold info for each player
 - a person card class, weapon card class, and room card class
 - a REPL that follows the course of game and allows user
   to enter bits of information to update game account
 
 Console Options:
 
-1) Register Rumor
+1) Register a rumor
 2) Check My Score Card (what I know about what I and everyone else have)
 3) Check An Opponent's Score Card (what I am able to know that a given other player knows about everyone else)
 4) Evaluate Accusation Probability (based on my and possibly others' score cards)

@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 /**
  * Created by njk on 7/9/16.
  */
@@ -7,10 +5,13 @@ public class Rumor {
     private String person;
     private String weapon;
     private String room;
-    private ArrayList<String> nonDisprovals;
+    /* array of usernames of players who could not disprove the rumor */
+    private String[] nonDisprovals;
+    /* disproval[0] is the username of someone who could disprove the rumor and disproval[1] is the card they
+       disproved with. If no one could disprove, disproval is null. */
     private String[] disproval;
 
-    public Rumor(String person, String weapon, String room, ArrayList<String> nonDisprovals, String[] disproval) {
+    public Rumor(String person, String weapon, String room, String[] nonDisprovals, String[] disproval) {
         this.person = person;
         this.weapon = weapon;
         this.room = room;
@@ -18,6 +19,7 @@ public class Rumor {
         this.disproval = disproval;
     }
 
+    /* Getters and Setters */
     public String getPerson() {
         return person;
     }
@@ -30,7 +32,7 @@ public class Rumor {
         return room;
     }
 
-    public ArrayList<String> getNonDisprovals() {
+    public String[] getNonDisprovals() {
         return nonDisprovals;
     }
 

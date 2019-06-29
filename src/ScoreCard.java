@@ -16,77 +16,74 @@ public class ScoreCard {
      */
     private String name;
 
-    public ScoreCard(String[] players, ArrayList<String> hand, String name) {
+    public ScoreCard(String name) {
         this.vals = new HashMap<>();
         this.name = name;
-        for (String p : players) {
+        for (String p : Runner.PERSON_NAMES) {
             vals.put(p, new HashMap<>());
-            for (String c : Runner.PERSON_NAMES) {
-                vals.get(p).put(c, null);
-            }
-            for (String c : Runner.WEAPON_NAMES) {
-                vals.get(p).put(c, null);
-            }
-            for (String c : Runner.ROOM_NAMES) {
-                vals.get(p).put(c, null);
+            vals.get(p).put(Runner.p1Name, null);
+            for (String n : Runner.otherNames) {
+                vals.get(p).put(n, null);
             }
         }
-        for (String c : hand) {
-            vals.get(c).put(name, true);
+        for (String p : Runner.WEAPON_NAMES) {
+            vals.put(p, new HashMap<>());
+            vals.get(p).put(Runner.p1Name, null);
+            for (String n : Runner.otherNames) {
+                vals.get(p).put(n, null);
+            }
+        }
+        for (String p : Runner.ROOM_NAMES) {
+            vals.put(p, new HashMap<>());
+            vals.get(p).put(Runner.p1Name, null);
+            for (String n : Runner.otherNames) {
+                vals.get(p).put(n, null);
+            }
+        }
+    }
+
+    public void addCards(String toWhom, ArrayList<String> cards) {
+        for (String c : cards) {
+            vals.get(c).replace(toWhom, true);
         }
     }
 
     public void noteRumor(Rumor r) {
-        for (String p : r.getNonDisprovals()) {
+        for (String p : r.getNonDisprovals()) { // note all non-disproving players to not have any of the rumor cards
             vals.get(r.getPerson()).replace(p, false);
             vals.get(r.getWeapon()).replace(p, false);
             vals.get(r.getRoom()).replace(p, false);
         }
         if (r.getDisproval() != null) {
-            /* If someone disproved */
+            /* If someone disproved, note them to have their disproving card */
             vals.get(r.getDisproval()[1]).put(r.getDisproval()[0], true);
         }
     }
 
     @Override
     public String toString() {
-        String rv = "               " + Runner.yourName + " | ";
+        String rv = "               " + Runner.p1Name + " | ";
         for (String p : Runner.otherNames) {
             rv += p + " | ";
         }
         rv += "\n";
 
-        rv += "People:\n";
-        for (String p : Runner.PERSON_NAMES) {
-            rv += p + "  ";
-            rv += displayBool(vals.get(p).get(Runner.yourName)) + " ";
-            for (String s : Runner.otherNames) {
-                rv += displayBool(vals.get(p).get(s)) + " ";
+        String[][] names = {Runner.PERSON_NAMES, Runner.WEAPON_NAMES, Runner.ROOM_NAMES};
+        String[] nms = {"People:\n", "Weapons:\n", "Rooms:\n"};
+
+        for (int i = 0; i < 3; i++) {
+            rv += nms[i];
+            for (String s : names[i]) {
+                rv += s + "  ";
+                rv += displayBool(vals.get(s).get(Runner.p1Name)) + " ";
+                for (String t : Runner.otherNames) {
+                    rv += displayBool(vals.get(t).get(s)) + " ";
+                }
+                rv += "\n";
             }
-            rv += "\n";
         }
 
-        rv += "Weapons:\n";
-        for (String w : Runner.WEAPON_NAMES) {
-            rv += w + "  ";
-            rv += displayBool(vals.get(w).get(Runner.yourName)) + " ";
-            for (String s : Runner.otherNames) {
-                rv += displayBool(vals.get(w).get(s)) + " ";
-            }
-            rv += "\n";
-        }
-
-        rv += "Rooms:\n";
-        for (String r : Runner.ROOM_NAMES) {
-            rv += r + "  ";
-            rv += displayBool(vals.get(r).get(Runner.yourName)) + " ";
-            for (String s : Runner.otherNames) {
-                rv += displayBool(vals.get(r).get(s)) + " ";
-            }
-            rv += "\n";
-        }
-
-        return "";
+        return rv;
     }
 
     private String displayBool(Boolean b) {
