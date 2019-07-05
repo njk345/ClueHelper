@@ -2,6 +2,7 @@
  * Created by njk on 7/1/16.
  */
 import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     private ScoreCard scoreCard;
@@ -11,12 +12,20 @@ public class User {
         this.name = name;
     }
 
-    public void addCards(String toWhom, ArrayList<String> cards) {
+    public void addCards(String toWhom, List<String> cards) {
         scoreCard.addCards(toWhom, cards);
     }
 
+    public void denyCards(String fromWhom, List<String> cards) {
+        scoreCard.denyCards(fromWhom, cards);
+    }
+
     public void buildScoreCard() {
-        this.scoreCard = new ScoreCard(name);
+        this.scoreCard = new ScoreCard();
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void noteRumor(Rumor r) {
