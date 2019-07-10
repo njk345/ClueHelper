@@ -14,8 +14,10 @@ public class Runner {
 
     static String p1Name;
     static ArrayList<String> otherNames;
+    static ArrayList<String> allNames;
     static User p1;
     static User[] opponents;
+    static User[] allPlayers; // array with p1 at index 0 and opponents after
 
     public static void main(String[] args) {
         System.out.println("Welcome to ClueHelper!\n");
@@ -36,10 +38,12 @@ public class Runner {
         }
         SCAN.nextLine();
 
-        System.out.print("Enter Your Name: ");
-        p1Name = SCAN.nextLine().replaceAll("\\s", "");
-        if (p1Name.isEmpty()) {
-            p1Name = "You";
+        while (p1Name == null) {
+            System.out.print("Enter Your Name: ");
+            p1Name = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+            if (p1Name.isEmpty()) {
+                p1Name = null;
+            }
         }
 
         p1 = new User(p1Name);
@@ -54,14 +58,25 @@ public class Runner {
             otherNames.add(name);
         }
 
+        allNames = new ArrayList<>();
+        allNames.add(p1Name);
+        for (String n : otherNames) {
+            allNames.add(n);
+        }
+
         opponents = new User[otherNames.size()];
 
         for (int i = 0; i < opponents.length; i++) {
             opponents[i] = new User(otherNames.get(i));
         }
 
-        p1.buildScoreCard();
-        for (User p : opponents) {
+        allPlayers = new User[opponents.length + 1];
+        allPlayers[0] = p1;
+        for (int i = 1; i < allPlayers.length; i++) {
+            allPlayers[i] = opponents[i - 1];
+        }
+
+        for (User p : allPlayers) {
             p.buildScoreCard();
         }
 
@@ -127,6 +142,17 @@ public class Runner {
                 SCAN.nextLine();
                 switch (choice) {
                     case 1: //Register Rumor
+                        String asker = null;
+                        while (asker == null) {
+                            System.out.print("Who started the rumor? ");
+                            asker = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+                            if (!allNames.contains(asker)) {
+                                asker = null;
+                            }
+                        }
+
+                        gap();
+
                         String person = null;
                         while (person == null) {
                             System.out.print("Enter rumored person: ");
@@ -159,48 +185,64 @@ public class Runner {
 
                         String[] ndpNames = null;
                         while (ndpNames == null) {
-                            System.out.print("Who could not disprove rumor (comma-sep, if any)? ");
+                            System.out.print("Who couldn't disprove the rumor (comma-separated, if anyone)? ");
                             ndpNames = scanNames();
                         }
 
-                        System.out.print("Did someone disprove the rumor (y/n)? ");
-                        boolean d = SCAN.nextLine().replaceAll("\\s", "").toLowerCase().equals("y");
-
                         String[] disproval = null;
-                        if (d) {
+                        if (ndpNames.length < allPlayers.length - 1) { // if not everyone couldn't disprove, someone must have disproved
                             disproval = new String[2];
                             String dpName = null;
                             while (dpName == null) {
                                 System.out.print("Who disproved the rumor? ");
                                 dpName = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
-                                if (!otherNames.contains(dpName)) {
+                                if (!allNames.contains(dpName)) {
                                     dpName = null;
                                 }
                             }
                             String dpCard = null;
-                            while (dpCard == null) {
-                                System.out.print("Enter name of card to disprove: ");
-                                dpCard = SCAN.nextLine().replaceAll("\\s", "");
-                                 if (!Arrays.asList(PERSON_NAMES).contains(dpCard) && !Arrays.asList(WEAPON_NAMES).contains(dpCard)
-                                        && !Arrays.asList(ROOM_NAMES).contains(dpCard)) {
-                                    dpCard = null;
+                            if (asker.equals(p1Name)) {
+                                while (dpCard == null) {
+                                    System.out.print("Enter name of card to disprove: ");
+                                    dpCard = SCAN.nextLine().replaceAll("\\s", "");
+                                    if (!Arrays.asList(PERSON_NAMES).contains(dpCard) && !Arrays.asList(WEAPON_NAMES).contains(dpCard)
+                                            && !Arrays.asList(ROOM_NAMES).contains(dpCard)) {
+                                        dpCard = null;
+                                    }
                                 }
                             }
                             disproval[0] = dpName;
                             disproval[1] = dpCard;
                         }
+
                         Rumor rumor = new Rumor(person, weapon, room, ndpNames, disproval);
-                        p1.noteRumor(rumor);
-                        for (User p : opponents) {
+                        for (User p : allPlayers) {
                             p.noteRumor(rumor);
                         }
                         break;
                     case 2:
+                        String ru = null;
+                        while (ru == null) {
+                            System.out.print("Whose cards were revealed? ");
+                            ru = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+                            if(!allNames.contains(ru)) {
+                                ru = null;
+                            }
+                        }
+
+                        System.out.println(ru);
+
                         List<Integer> personRevealed = null;
                         while (personRevealed == null) {
                             System.out.println("Select Which Person Cards Were Revealed (Enter Numbers Comma Separated): ");
                             printArray(PERSON_NAMES);
                             personRevealed = scanIntSelections(PERSON_NAMES.length);
+                        }
+
+                        List<String> rpCards = personRevealed.stream().map(i -> PERSON_NAMES[i]).collect(Collectors.toList());
+                        System.out.println(rpCards);
+                        for (User u : allPlayers) {
+                            u.addCards(ru, rpCards);
                         }
 
                         gap();
@@ -212,6 +254,11 @@ public class Runner {
                             weaponRevealed = scanIntSelections(WEAPON_NAMES.length);
                         }
 
+                        List<String> rwCards = weaponRevealed.stream().map(i -> WEAPON_NAMES[i]).collect(Collectors.toList());
+                        for (User u : allPlayers) {
+                            u.addCards(ru, rwCards);
+                        }
+
                         gap();
 
                         List<Integer> roomRevealed = null;
@@ -220,16 +267,22 @@ public class Runner {
                             printArray(ROOM_NAMES);
                             roomRevealed = scanIntSelections(ROOM_NAMES.length);
                         }
+
+                        List<String> rrCards = roomRevealed.stream().map(i -> ROOM_NAMES[i]).collect(Collectors.toList());
+                        for (User u : allPlayers) {
+                            u.addCards(ru, rrCards);
+                        }
+
                         break;
                     case 3: //Check My Score Card
                         p1.printScoreCard();
                         break;
                     case 4: //Check My Idea of An Opponent's Score Card
                         String opName = null;
-                        while(opName == null) {
+                        while (opName == null) {
                             System.out.print("Enter opponent name: ");
                             opName = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
-                            if(!otherNames.contains(opName)) {
+                            if (!otherNames.contains(opName)) {
                                 opName = null;
                             }
                         }
@@ -257,7 +310,7 @@ public class Runner {
 
     private static User getUser(String name) {
         for (User r : opponents) {
-            if(r.getName().equals(name)) {
+            if (r.getName().equals(name)) {
                 return r;
             }
         }
@@ -292,7 +345,7 @@ public class Runner {
         String[] names = nameStr.split(",");
         for (int i = 0; i < names.length; i++) {
             names[i] = names[i].toLowerCase();
-            if (!otherNames.contains(names[i])) {
+            if (!allNames.contains(names[i])) {
                 System.out.println("Invalid name!");
                 return null;
             }

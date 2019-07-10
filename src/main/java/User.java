@@ -1,7 +1,7 @@
 /**
  * Created by njk on 7/1/16.
  */
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class User {

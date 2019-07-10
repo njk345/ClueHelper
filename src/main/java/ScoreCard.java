@@ -57,11 +57,10 @@ public class ScoreCard {
     }
 
     public void noteRumor(Rumor r) {
-        System.out.println(Arrays.toString(r.getNonDisprovals()));
         for (String p : r.getNonDisprovals()) { // note all non-disproving players to not have any of the rumor cards
-            denyCards(p, (ArrayList<String>) Arrays.asList(r.getPerson(), r.getWeapon(), r.getRoom()));
+            denyCards(p, Arrays.asList(r.getPerson(), r.getWeapon(), r.getRoom()));
         }
-        if (r.getDisproval() != null) {
+        if (r.getDisproval() != null && r.getDisproval()[1] != null) {
             /* If someone disproved, note them to have their disproving card */
             vals.get(r.getDisproval()[1]).put(r.getDisproval()[0], true);
         }
@@ -69,9 +68,11 @@ public class ScoreCard {
 
     @Override
     public String toString() {
-        ArrayList<String> headerRow = (ArrayList<String>) Runner.otherNames.clone();
-        headerRow.add(0, Runner.p1Name);
-        headerRow.add(0, "Cards");
+        ArrayList<String> headerRow = new ArrayList<>();
+        headerRow.add("Cards");
+        for (String n : Runner.allNames) {
+            headerRow.add(n);
+        }
 
         AsciiTable at = new AsciiTable();
         at.addRule();
@@ -88,6 +89,7 @@ public class ScoreCard {
             at.addRow(row);
             at.addRule();
         }
+        at.addRule();
         for (int w = 0; w < Runner.WEAPON_NAMES.length; w++) {
             ArrayList<String> row = new ArrayList<>();
             row.add(Runner.WEAPON_NAMES[w]);
@@ -98,6 +100,7 @@ public class ScoreCard {
             at.addRow(row);
             at.addRule();
         }
+        at.addRule();
         for (int r = 0; r < Runner.ROOM_NAMES.length; r++) {
             ArrayList<String> row = new ArrayList<>();
             row.add(Runner.ROOM_NAMES[r]);
