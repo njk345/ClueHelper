@@ -21,21 +21,22 @@ public class ScoreCard {
 
     public ScoreCard() {
         this.vals = new HashMap<>();
-        for (String p : Runner.PERSON_NAMES) {
+        /* Make the keys for vals the no-whitespace, lower-case card names that are the keys in pSet, wSet, rSet */
+        for (String p : Runner.pSet.keySet()) {
             vals.put(p, new HashMap<>());
             vals.get(p).put(Runner.p1Name, null);
             for (String n : Runner.otherNames) {
                 vals.get(p).put(n, null);
             }
         }
-        for (String p : Runner.WEAPON_NAMES) {
+        for (String p : Runner.wSet.keySet()) {
             vals.put(p, new HashMap<>());
             vals.get(p).put(Runner.p1Name, null);
             for (String n : Runner.otherNames) {
                 vals.get(p).put(n, null);
             }
         }
-        for (String p : Runner.ROOM_NAMES) {
+        for (String p : Runner.rSet.keySet()) {
             vals.put(p, new HashMap<>());
             vals.get(p).put(Runner.p1Name, null);
             for (String n : Runner.otherNames) {
@@ -71,7 +72,7 @@ public class ScoreCard {
         ArrayList<String> headerRow = new ArrayList<>();
         headerRow.add("Cards");
         for (String n : Runner.allNames) {
-            headerRow.add(n);
+            headerRow.add(cap(n));
         }
 
         AsciiTable at = new AsciiTable();
@@ -79,39 +80,43 @@ public class ScoreCard {
         at.addRow(headerRow);
         at.addRule();
 
-        for (int p = 0; p < Runner.PERSON_NAMES.length; p++) {
+        for (String p : Runner.pSet.keySet()) {
             ArrayList<String> row = new ArrayList<>();
-            row.add(Runner.PERSON_NAMES[p]);
-            row.add(displayBool(vals.get(Runner.PERSON_NAMES[p]).get(Runner.p1Name)));
+            row.add(Runner.PERSON_NAMES[Runner.pSet.get(p)]); // add the nice-looking version from PERSON_NAMES
+            row.add(displayBool(vals.get(p).get(Runner.p1Name)));
             for (String t : Runner.otherNames) {
-                row.add(displayBool(vals.get(Runner.PERSON_NAMES[p]).get(t)));
+                row.add(displayBool(vals.get(p).get(t)));
             }
             at.addRow(row);
             at.addRule();
         }
         at.addRule();
-        for (int w = 0; w < Runner.WEAPON_NAMES.length; w++) {
+        for (String w : Runner.wSet.keySet()) {
             ArrayList<String> row = new ArrayList<>();
-            row.add(Runner.WEAPON_NAMES[w]);
-            row.add(displayBool(vals.get(Runner.WEAPON_NAMES[w]).get(Runner.p1Name)));
+            row.add(Runner.WEAPON_NAMES[Runner.wSet.get(w)]); // add the nice-looking version from WEAPON_NAMES
+            row.add(displayBool(vals.get(w).get(Runner.p1Name)));
             for (String t : Runner.otherNames) {
-                row.add(displayBool(vals.get(Runner.WEAPON_NAMES[w]).get(t)));
+                row.add(displayBool(vals.get(w).get(t)));
             }
             at.addRow(row);
             at.addRule();
         }
         at.addRule();
-        for (int r = 0; r < Runner.ROOM_NAMES.length; r++) {
+        for (String r : Runner.rSet.keySet()) {
             ArrayList<String> row = new ArrayList<>();
-            row.add(Runner.ROOM_NAMES[r]);
-            row.add(displayBool(vals.get(Runner.ROOM_NAMES[r]).get(Runner.p1Name)));
+            row.add(Runner.ROOM_NAMES[Runner.rSet.get(r)]); // add the nice-looking version from ROOM_NAMES
+            row.add(displayBool(vals.get(r).get(Runner.p1Name)));
             for (String t : Runner.otherNames) {
-                row.add(displayBool(vals.get(Runner.ROOM_NAMES[r]).get(t)));
+                row.add(displayBool(vals.get(r).get(t)));
             }
             at.addRow(row);
             at.addRule();
         }
         return at.render();
+    }
+
+    private String cap(String s) {
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
     private String displayBool(Boolean b) {

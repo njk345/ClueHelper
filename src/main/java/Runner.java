@@ -1,14 +1,22 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 public class Runner {
     static final int MIN_PLAYERS = 2, MAX_PLAYERS = 6;
     static final String[] PERSON_NAMES = {"Colonel Mustard", "Miss Scarlet", "Professor Plum", "Mr. Green",
-            "Mrs. White", "Mrs. Peacock", "Mr. Plum"};
+            "Mrs. White", "Mrs. Peacock"};
+    static HashMap<String, Integer> pSet;
     static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Lead pipe", "Revolver", "Rope", "Wrench"};
+    static HashMap<String, Integer> wSet;
     static final String[] ROOM_NAMES = {"Kitchen", "Ballroom", "Conservatory", "Dining Room", "Billiard Room",
             "Library", "Lounge", "Hall", "Study"};
-    static final String[] CONSOLE_OPTIONS = {"Register Rumor", "Register Revealed Opponent Hand", "Print My Score Card", "Print An Opponent's Score Card",
+    static HashMap<String, Integer> rSet;
+    static final String[] CONSOLE_OPTIONS = {"Register Rumor", "Register Player Loss", "Print My Score Card", "Print An Opponent's Score Card",
             "Calculate Accusation Probability", "Suggest Useful Rumor", "Print Score Card to File", "End Game & Print Score Card to File"};
     static final Scanner SCAN = new Scanner(System.in);
 
@@ -20,6 +28,21 @@ public class Runner {
     static User[] allPlayers; // array with p1 at index 0 and opponents after
 
     public static void main(String[] args) {
+        /* Populate pSet, wSet, rSet with pairings between no-whitespace, lower-case versions of PERSON_NAMES, etc.,
+           strings and their integer indices in each String[] --> e.g. (colonelmustard, 0), (knife, 1), (mr.green, 3) */
+        pSet = new HashMap<>();
+        for (int i = 0; i < PERSON_NAMES.length; i++) {
+            pSet.put(PERSON_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
+        }
+        wSet = new HashMap<>();
+        for (int i = 0; i < WEAPON_NAMES.length; i++) {
+            wSet.put(WEAPON_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
+        }
+        rSet = new HashMap<>();
+        for (int i = 0; i < ROOM_NAMES.length; i++) {
+            rSet.put(ROOM_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
+        }
+
         System.out.println("Welcome to ClueHelper!\n");
         System.out.print("How many players are present (2-6)? ");
         int numPlayers = -1;
@@ -40,7 +63,7 @@ public class Runner {
 
         while (p1Name == null) {
             System.out.print("Enter Your Name: ");
-            p1Name = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+            p1Name = scanStr();
             if (p1Name.isEmpty()) {
                 p1Name = null;
             }
@@ -51,7 +74,7 @@ public class Runner {
         otherNames = new ArrayList<>();
         for (int i = 0; i < numPlayers - 1; i++) {
             System.out.print("Enter Player " + (i + 2) + "'s Name: ");
-            String name = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+            String name = scanStr();
             if (name.isEmpty()) {
                 name = "Player " + (i + 2);
             }
@@ -88,13 +111,16 @@ public class Runner {
             printArray(PERSON_NAMES);
             personIndices = scanIntSelections(PERSON_NAMES.length);
         }
-        List<String> pCards = personIndices.stream().map(i -> PERSON_NAMES[i]).collect(Collectors.toList());
+        List<String> pCards = personIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
         p1.addCards(p1Name, pCards);
+        for (String n : otherNames) {
+            p1.denyCards(n, pCards);
+        }
 
-        List<Integer> nonPIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6));
+        List<Integer> nonPIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
         nonPIndices.removeAll(personIndices);
 
-        List<String> nonPCards = nonPIndices.stream().map(i -> PERSON_NAMES[i]).collect(Collectors.toList());
+        List<String> nonPCards = nonPIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
         p1.denyCards(p1Name, nonPCards);
 
         gap();
@@ -105,13 +131,16 @@ public class Runner {
             printArray(WEAPON_NAMES);
             weaponIndices = scanIntSelections(WEAPON_NAMES.length);
         }
-        List<String> wCards = weaponIndices.stream().map(i -> WEAPON_NAMES[i]).collect(Collectors.toList());
+        List<String> wCards = weaponIndices.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
         p1.addCards(p1Name, wCards);
+        for (String n : otherNames) {
+            p1.denyCards(n, wCards);
+        }
 
         List<Integer> nonWIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
         nonWIndices.removeAll(weaponIndices);
 
-        List<String> nonWCards = nonWIndices.stream().map(i -> WEAPON_NAMES[i]).collect(Collectors.toList());
+        List<String> nonWCards = nonWIndices.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
         p1.denyCards(p1Name, nonWCards);
 
         gap();
@@ -122,13 +151,16 @@ public class Runner {
             printArray(ROOM_NAMES);
             roomIndices = scanIntSelections(ROOM_NAMES.length);
         }
-        List<String> rCards = roomIndices.stream().map(i -> ROOM_NAMES[i]).collect(Collectors.toList());
+        List<String> rCards = roomIndices.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
         p1.addCards(p1Name, rCards);
+        for (String n : otherNames) {
+            p1.denyCards(n, rCards);
+        }
 
         List<Integer> nonRIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
         nonRIndices.removeAll(roomIndices);
 
-        List<String> nonRCards = nonRIndices.stream().map(i -> ROOM_NAMES[i]).collect(Collectors.toList());
+        List<String> nonRCards = nonRIndices.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
         p1.denyCards(p1Name, nonRCards);
 
         gap();
@@ -145,7 +177,7 @@ public class Runner {
                         String asker = null;
                         while (asker == null) {
                             System.out.print("Who started the rumor? ");
-                            asker = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+                            asker = scanStr();
                             if (!allNames.contains(asker)) {
                                 asker = null;
                             }
@@ -156,8 +188,8 @@ public class Runner {
                         String person = null;
                         while (person == null) {
                             System.out.print("Enter rumored person: ");
-                            person = SCAN.nextLine();
-                            if (!Arrays.asList(PERSON_NAMES).contains(person)) {
+                            person = scanStr();
+                            if (!pSet.containsKey(person)) {
                                 person = null;
                             }
                         }
@@ -166,8 +198,8 @@ public class Runner {
                         String weapon = null;
                         while (weapon == null) {
                             System.out.print("Enter rumored weapon: ");
-                            weapon = SCAN.nextLine();
-                            if (!Arrays.asList(WEAPON_NAMES).contains(weapon)) {
+                            weapon = scanStr();
+                            if (!wSet.containsKey(weapon)) {
                                 weapon = null;
                             }
                         }
@@ -176,8 +208,8 @@ public class Runner {
                         String room = null;
                         while (room == null) {
                             System.out.print("Enter rumored room: ");
-                            room = SCAN.nextLine();
-                            if (!Arrays.asList(ROOM_NAMES).contains(room)) {
+                            room = scanStr();
+                            if (!rSet.containsKey(room)) {
                                 room = null;
                             }
                         }
@@ -195,7 +227,7 @@ public class Runner {
                             String dpName = null;
                             while (dpName == null) {
                                 System.out.print("Who disproved the rumor? ");
-                                dpName = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+                                dpName = scanStr();
                                 if (!allNames.contains(dpName)) {
                                     dpName = null;
                                 }
@@ -204,9 +236,9 @@ public class Runner {
                             if (asker.equals(p1Name)) {
                                 while (dpCard == null) {
                                     System.out.print("Enter name of card to disprove: ");
-                                    dpCard = SCAN.nextLine().replaceAll("\\s", "");
-                                    if (!Arrays.asList(PERSON_NAMES).contains(dpCard) && !Arrays.asList(WEAPON_NAMES).contains(dpCard)
-                                            && !Arrays.asList(ROOM_NAMES).contains(dpCard)) {
+                                    dpCard = scanStr();
+                                    if (!pSet.containsKey(dpCard) && !wSet.containsKey(dpCard)
+                                            && !rSet.containsKey(dpCard)) {
                                         dpCard = null;
                                     }
                                 }
@@ -220,57 +252,70 @@ public class Runner {
                             p.noteRumor(rumor);
                         }
                         break;
-                    case 2:
+                    case 2: // Register Player Loss
                         String ru = null;
                         while (ru == null) {
-                            System.out.print("Whose cards were revealed? ");
-                            ru = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
-                            if(!allNames.contains(ru)) {
+                            System.out.print("Which player was eliminated? ");
+                            ru = scanStr();
+                            if (!allNames.contains(ru)) {
                                 ru = null;
                             }
                         }
 
-                        System.out.println(ru);
-
                         List<Integer> personRevealed = null;
                         while (personRevealed == null) {
-                            System.out.println("Select Which Person Cards Were Revealed (Enter Numbers Comma Separated): ");
+                            System.out.println("Select Which Person Cards They Had (Enter Numbers Comma Separated): ");
                             printArray(PERSON_NAMES);
                             personRevealed = scanIntSelections(PERSON_NAMES.length);
                         }
 
-                        List<String> rpCards = personRevealed.stream().map(i -> PERSON_NAMES[i]).collect(Collectors.toList());
-                        System.out.println(rpCards);
+                        List<String> rpCards = personRevealed.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
                         for (User u : allPlayers) {
+                            /* Have every player note that ru holds rpCards, and that no other player holds them */
                             u.addCards(ru, rpCards);
+                            for (String n : allNames) {
+                                if (!n.equals(ru)) {
+                                    u.denyCards(n, rpCards);
+                                }
+                            }
                         }
 
                         gap();
 
                         List<Integer> weaponRevealed = null;
                         while (weaponRevealed == null) {
-                            System.out.println("Select Which Weapon Cards Were Revealed (Enter Numbers Comma Separated): ");
+                            System.out.println("Select Which Weapon Cards They Had (Enter Numbers Comma Separated): ");
                             printArray(WEAPON_NAMES);
                             weaponRevealed = scanIntSelections(WEAPON_NAMES.length);
                         }
 
-                        List<String> rwCards = weaponRevealed.stream().map(i -> WEAPON_NAMES[i]).collect(Collectors.toList());
+                        List<String> rwCards = weaponRevealed.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
                         for (User u : allPlayers) {
                             u.addCards(ru, rwCards);
+                            for (String n : allNames) {
+                                if (!n.equals(ru)) {
+                                    u.denyCards(n, rwCards);
+                                }
+                            }
                         }
 
                         gap();
 
                         List<Integer> roomRevealed = null;
                         while (roomRevealed == null) {
-                            System.out.println("Select Which Room Cards Were Revealed (Enter Numbers Comma Separated): ");
+                            System.out.println("Select Which Room Cards They Had (Enter Numbers Comma Separated): ");
                             printArray(ROOM_NAMES);
                             roomRevealed = scanIntSelections(ROOM_NAMES.length);
                         }
 
-                        List<String> rrCards = roomRevealed.stream().map(i -> ROOM_NAMES[i]).collect(Collectors.toList());
+                        List<String> rrCards = roomRevealed.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
                         for (User u : allPlayers) {
                             u.addCards(ru, rrCards);
+                            for (String n : allNames) {
+                                if (!n.equals(ru)) {
+                                    u.denyCards(n, rrCards);
+                                }
+                            }
                         }
 
                         break;
@@ -281,7 +326,7 @@ public class Runner {
                         String opName = null;
                         while (opName == null) {
                             System.out.print("Enter opponent name: ");
-                            opName = SCAN.nextLine().replaceAll("\\s", "").toLowerCase();
+                            opName = scanStr();
                             if (!otherNames.contains(opName)) {
                                 opName = null;
                             }
@@ -335,16 +380,23 @@ public class Runner {
         }
     }
 
+    private static String scanStr() {
+        return clean(SCAN.nextLine());
+    }
+
+    private static String clean(String s) {
+        return s.replaceAll("\\s", "").toLowerCase();
+    }
+
     private static int scanInt() throws InputMismatchException {
         int i = SCAN.nextInt();
         return i;
     }
 
     private static String[] scanNames() {
-        String nameStr = SCAN.nextLine().replaceAll("\\s", "");
+        String nameStr = scanStr();
         String[] names = nameStr.split(",");
         for (int i = 0; i < names.length; i++) {
-            names[i] = names[i].toLowerCase();
             if (!allNames.contains(names[i])) {
                 System.out.println("Invalid name!");
                 return null;
@@ -355,7 +407,7 @@ public class Runner {
 
     private static ArrayList<Integer> scanIntSelections(int numChoices) {
         System.out.print("Selections: ");
-        String selections = SCAN.nextLine().replaceAll("\\s", ""); // remove whitespace
+        String selections = scanStr(); // remove whitespace (and make lower-case)
         String[] sSplit = selections.split(","); // separate numbers between commas
         ArrayList<Integer> indices = new ArrayList<>(sSplit.length);
         for (int i = 0; i < sSplit.length; i++) {

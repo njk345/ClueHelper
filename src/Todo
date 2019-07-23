@@ -1,0 +1,7 @@
+- Registering player losses
+  - when player's cards revealed, don't ask about them any more
+  - when all players but one removed, trigger end of game
+
+- Ensuring cards assigned to opponents in rumor disprovals and revealed hands aren't already assigned to someone
+
+
