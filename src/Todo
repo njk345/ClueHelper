@@ -1,7 +1,18 @@
 - Registering player losses
-  - when player's cards revealed, don't ask about them any more
-  - when all players but one removed, trigger end of game
+  - Failed Accusations
+    - Register card info in some way, possibly with probability involved
+    - Register revealed hand and remove from game
+  - Other Loss (like too many time cards)
+    - Register revealed hand and remove from game
+  - When all players but one removed, end the game
 
-- Ensuring cards assigned to opponents in rumor disprovals and revealed hands aren't already assigned to someone
+- Don't allow assigning cards to someone that have already been assigned to someone else
+
+- Printing score card to text file
+
+- Probability handling
+    - Rumor disproval partial probabilities
+    - Failed accusations partial probabilities
+    - Repeated rumor narrowing down (partial probs)
 
 
