@@ -2,6 +2,9 @@
  * Created by njk on 7/1/16.
  */
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class User {
@@ -34,5 +37,16 @@ public class User {
 
     public void printScoreCard() {
         System.out.println(scoreCard);
+    }
+
+    public void printScoreCardToFile() {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("scorecards/" + name + "ScoreCard.txt"));
+            bw.write(scoreCard.toString());
+            bw.close();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
     }
 }

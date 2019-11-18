@@ -337,10 +337,12 @@ public class Runner {
                         break;
                     case 6: //Suggest Useful Rumor
                         break;
-                    case 7: //Output Score Card
+                    case 7: //Output Score Card to File
+                        p1.printScoreCardToFile();
                         break;
                     case 8: //End Game and Output Score Card
                         gameOver = true;
+                        p1.printScoreCardToFile();
                         break;
                     default:
                         System.out.println("\nInvalid Choice!");

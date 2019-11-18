@@ -8,7 +8,7 @@
 
 - Don't allow assigning cards to someone that have already been assigned to someone else
 
-- Printing score card to text file
+√- Printing score card to text file
 
 - Probability handling
     - Rumor disproval partial probabilities
