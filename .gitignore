@@ -1,7 +1,11 @@
-/out/
+out/
 
 *.class
 
-/.idea/
+.idea/
 
 *.iml
+
+scorecards/
+
+target/
