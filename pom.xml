@@ -6,18 +6,94 @@
 
     <groupId>groupId</groupId>
     <artifactId>ClueHelper</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
+    <!-- Defines UTF-8 encoding -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Build section -->
     <build>
         <plugins>
+
+            <!-- Maven compiler plugin for compiling Java 11 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.5</version>
+                <executions>
+                    <execution>
+                        <id>default-prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>COMPLEXITY</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.50</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M4</version>
+            </plugin>
+            <!-- Minimum maven version is 3.6.0 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.0</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -28,8 +104,139 @@
             <artifactId>asciitable</artifactId>
             <version>0.3.2</version>
         </dependency>
+
+        <!--
+        junit is a testing framework.
+        http://junit.org/junit4/.
+        -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+        </dependency>
+
+        <!--
+            Hamcrest is used for creating assertion tests in junit.
+            https://github.com/hamcrest/JavaHamcrest.
+        -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+        </dependency>
     </dependencies>
 
+    <!-- Reporting Section -->
+    <reporting>
+        <plugins>
 
+            <!--
+                Plugin used to report on project dependencies.
+                https://maven.apache.org/plugins/maven-project-info-reports-plugin/.
+            -->
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <!-- Until it uses BCEL 6.0, details breaks on Java 11 -->
+                    <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                    <!-- jetty related locations can't be found, just skip. -->
+                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                </configuration>
+            </plugin>
+
+            <!--
+                Maven JXR plugin used with PMD plugin for referencing code errors.
+                https://maven.apache.org/jxr/maven-jxr-plugin/.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+
+            <!--
+                Javadoc plugin for generating javadoc site.
+                https://maven.apache.org/plugins/maven-javadoc-plugin/.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                </configuration>
+            </plugin>
+
+            <!-- Uses cs32_checks.xml in config directory to check project style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <configLocation>config/cs32_checks.xml</configLocation>
+                </configuration>
+            </plugin>
+
+            <!--
+                PMD looks for bad coding practices such as unused variables.
+                https://maven.apache.org/plugins/maven-pmd-plugin/.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.12.0</version>
+            </plugin>
+
+            <!--
+                spotbugs plugin to highlight possible code errors.
+                https://spotbugs.readthedocs.io/en/latest/maven.html.
+            -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.12.2</version>
+                <configuration>
+                    <!--
+                        Enable analysis which takes more memory but finds more bugs.
+                        If you run out of memory, change the value to 'Low'.
+                    -->
+                    <effort>Max</effort>
+                    <!-- Report all bugs (other values are medium and max) -->
+                    <threshold>Low</threshold>
+                </configuration>
+            </plugin>
+
+            <!--
+                jacoco creates a "coverage" report, so you can see what
+                lines of codes and bracnhes your tests exercise.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0-M4</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- select non-aggregate reports -->
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+        </plugins>
+    </reporting>
     
 </project>
