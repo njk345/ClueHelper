@@ -3,8 +3,10 @@
  */
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 public class User {
@@ -15,16 +17,28 @@ public class User {
     this.name = name;
   }
 
-  public void addCards(String toWhom, List<String> cards) {
+  public void addCard(String toWhom, String card) {
+    scoreCard.addCard(toWhom, card);
+  }
+
+  public void addCards(String toWhom, Collection<String> cards) {
     scoreCard.addCards(toWhom, cards);
   }
 
-  public void denyCards(String fromWhom, List<String> cards) {
+  public void denyCard(String fromWhom, String card) {
+    scoreCard.denyCard(fromWhom, card);
+  }
+
+  public void denyCards(String fromWhom, Collection<String> cards) {
     scoreCard.denyCards(fromWhom, cards);
   }
 
   public void buildScoreCard() {
     this.scoreCard = new ScoreCard();
+  }
+
+  public ScoreCard getScoreCard() {
+    return scoreCard;
   }
 
   public String getName() {
@@ -41,7 +55,12 @@ public class User {
 
   public void printScoreCardToFile() {
     try {
-      BufferedWriter bw = new BufferedWriter(new FileWriter("scorecards/" + name + "ScoreCard.txt"));
+      File scorecardsDir = new File("scorecards");
+      if (!scorecardsDir.isDirectory()) {
+        /* scorecards dir doesnt exist yet, so create it */
+        scorecardsDir.mkdir();
+      }
+      BufferedWriter bw = new BufferedWriter(new FileWriter(new File("scorecards/" + name + "ScoreCard.txt")));
       bw.write(scoreCard.toString());
       bw.close();
     } catch (IOException ioe) {

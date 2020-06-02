@@ -4,17 +4,20 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Runner {
   static final int MIN_PLAYERS = 2, MAX_PLAYERS = 6;
-  static final String[] PERSON_NAMES = {"Colonel Mustard", "Miss Scarlet", "Professor Plum", "Mr. Green",
-      "Mrs. White", "Mrs. Peacock"};
-  static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Lead pipe", "Revolver", "Rope", "Wrench"};
-  static final String[] ROOM_NAMES = {"Kitchen", "Ballroom", "Conservatory", "Dining Room", "Billiard Room",
-      "Library", "Lounge", "Hall", "Study"};
-  static final String[] CONSOLE_OPTIONS = {"Register Rumor", "Register Player Loss", "Print My Score Card", "Print An Opponent's Score Card",
-      "Calculate Accusation Probability", "Suggest Useful Rumor", "Print Score Card to File", "End Game & Print Score Card to File"};
+  static final String[] PERSON_NAMES = {"Colonel Mustard", "Miss Scarlet", "Professor Plum",
+      "Mr. Green", "Mrs. White", "Mrs. Peacock"};
+  static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Lead pipe", "Revolver", "Rope",
+      "Wrench"};
+  static final String[] ROOM_NAMES = {"Kitchen", "Ballroom", "Conservatory", "Dining Room",
+      "Billiard Room", "Library", "Lounge", "Hall", "Study"};
+  static final String[] CONSOLE_OPTIONS = {"Register Rumor", "Register Player Loss",
+      "Print My Score Card", "Print An Opponent's Score Card", "Calculate Accusation Probability",
+      "Suggest Useful Rumor", "End Game", "End Game & Print My Score Card to File"};
   static final Scanner SCAN = new Scanner(System.in);
   static HashMap<String, Integer> pSet;
   static HashMap<String, Integer> wSet;
@@ -27,8 +30,9 @@ public class Runner {
   static User[] allPlayers; // array with p1 at index 0 and opponents after
 
   public static void main(String[] args) {
-        /* Populate pSet, wSet, rSet with pairings between no-whitespace, lower-case versions of PERSON_NAMES, etc.,
-           strings and their integer indices in each String[] --> e.g. (colonelmustard, 0), (knife, 1), (mr.green, 3) */
+    /* Populate pSet, wSet, rSet with pairings between no-whitespace, lower-case versions of
+    PERSON_NAMES, etc., strings and their integer indices in each String[] -->
+    e.g. (colonelmustard, 0), (knife, 1), (mr.green, 3) */
     pSet = new HashMap<>();
     for (int i = 0; i < PERSON_NAMES.length; i++) {
       pSet.put(PERSON_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
@@ -112,8 +116,10 @@ public class Runner {
     }
     /* Maps indices selected to card names, and makes a list of player card names selected */
     List<String> pCards = personIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
+    /* Assign chosen cards to p1 */
     p1.addCards(p1Name, pCards);
     for (String n : otherNames) {
+      /* From p1's perspective, deny all other players p1's cards */
       p1.denyCards(n, pCards);
     }
 
@@ -121,9 +127,12 @@ public class Runner {
     nonPIndices.removeAll(personIndices);
 
     List<String> nonPCards = nonPIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
+    /* Deny p1 the cards they did not assign their self */
     p1.denyCards(p1Name, nonPCards);
 
     gap();
+
+    /* Repeat the process above for weapon cards and room cards */
 
     List<Integer> weaponIndices = null;
     while (weaponIndices == null) {
@@ -165,6 +174,8 @@ public class Runner {
 
     gap();
 
+    /* ----------- GAME REPL ------------- */
+
     boolean gameOver = false;
     while (!gameOver) {
       printConsoleOptions();
@@ -173,7 +184,7 @@ public class Runner {
         gap();
         SCAN.nextLine();
         switch (choice) {
-          case 1: //Register Rumor
+          case 1: // Register Rumor
             String asker = null;
             while (asker == null) {
               System.out.print("Who started the rumor? ");
@@ -232,8 +243,13 @@ public class Runner {
                   dpName = null;
                 }
               }
+              if (dpName.equals(asker)) {
+                System.out.println("Asker cannot disprove their own rumor");
+                break;
+              }
               String dpCard = null;
-              if (asker.equals(p1Name)) {
+              if (asker.equals(p1Name) || dpName.equals(p1Name)) {
+                /* If p1 started the rumor or disproved the rumor */
                 while (dpCard == null) {
                   System.out.print("Enter name of card to disprove: ");
                   dpCard = scanStr();
@@ -245,6 +261,13 @@ public class Runner {
               }
               disproval[0] = dpName;
               disproval[1] = dpCard;
+
+              /* Error checking */
+              if (p1.getScoreCard().hasCard(dpName, dpCard) != null &&
+                  !p1.getScoreCard().hasCard(dpName, dpCard)) {
+                System.out.println("Someone else has already been assigned " + dpCard);
+                break;
+              }
             }
 
             Rumor rumor = new Rumor(person, weapon, room, ndpNames, disproval);
@@ -269,16 +292,17 @@ public class Runner {
               personRevealed = scanIntSelections(PERSON_NAMES.length);
             }
 
-            List<String> rpCards = personRevealed.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
-            for (User u : allPlayers) {
-              /* Have every player note that ru holds rpCards, and that no other player holds them */
-              u.addCards(ru, rpCards);
-              for (String n : allNames) {
-                if (!n.equals(ru)) {
-                  u.denyCards(n, rpCards);
-                }
+            Set<String> rpCards = personRevealed.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toSet());
+            boolean problem1 = false;
+            for (String rpc: rpCards) {
+              if (p1.getScoreCard().hasCard(ru, rpc) != null &&
+                  !p1.getScoreCard().hasCard(ru, rpc)) {
+                System.out.println("Someone else has already been assigned " + rpc);
+                problem1 = true;
+                break;
               }
             }
+            if (problem1) break;
 
             gap();
 
@@ -289,15 +313,17 @@ public class Runner {
               weaponRevealed = scanIntSelections(WEAPON_NAMES.length);
             }
 
-            List<String> rwCards = weaponRevealed.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
-            for (User u : allPlayers) {
-              u.addCards(ru, rwCards);
-              for (String n : allNames) {
-                if (!n.equals(ru)) {
-                  u.denyCards(n, rwCards);
-                }
+            Set<String> rwCards = weaponRevealed.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toSet());
+            boolean problem2 = false;
+            for (String rwc: rwCards) {
+              if (p1.getScoreCard().hasCard(ru, rwc) != null &&
+                  !p1.getScoreCard().hasCard(ru, rwc)) {
+                System.out.println("Someone else has already been assigned " + rwc);
+                problem2 = true;
+                break;
               }
             }
+            if (problem2) break;
 
             gap();
 
@@ -308,21 +334,68 @@ public class Runner {
               roomRevealed = scanIntSelections(ROOM_NAMES.length);
             }
 
-            List<String> rrCards = roomRevealed.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
-            for (User u : allPlayers) {
-              u.addCards(ru, rrCards);
-              for (String n : allNames) {
-                if (!n.equals(ru)) {
-                  u.denyCards(n, rrCards);
+            Set<String> rrCards = roomRevealed.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toSet());
+            boolean problem3 = false;
+            for (String rrc: rrCards) {
+              if (p1.getScoreCard().hasCard(ru, rrc) != null &&
+                  !p1.getScoreCard().hasCard(ru, rrc)) {
+                System.out.println("Someone else has already been assigned " + rrc);
+                problem3 = true;
+                break;
+              }
+            }
+            if (problem3) break;
+
+            List<Set<String>> revealedCardLists = new ArrayList<>();
+            revealedCardLists.add(rpCards);
+            revealedCardLists.add(rwCards);
+            revealedCardLists.add(rrCards);
+
+            /* ASSIGNING CARDS */
+
+            /* For all users, assign the revealed cards of each type to the player who lost.
+            Also, note that no other player has each of the revealed cards.
+             */
+            for (Set<String> revealedCardList : revealedCardLists) {
+              for (User u : allPlayers) {
+                u.addCards(ru, revealedCardList);
+                for (String n : allNames) {
+                  if (!n.equals(ru)) {
+                    u.denyCards(n, revealedCardList);
+                  }
                 }
               }
             }
-
+            /* Deny every card not revealed to the losing player */
+            for (int i = 0; i < PERSON_NAMES.length; i++) {
+              String pName = clean(PERSON_NAMES[i]);
+              if (!rpCards.contains(pName)) {
+                for (User u : allPlayers) {
+                  u.denyCard(ru, pName);
+                }
+              }
+            }
+            for (int i = 0; i < WEAPON_NAMES.length; i++) {
+              String wName = clean(WEAPON_NAMES[i]);
+              if (!rwCards.contains(wName)) {
+                for (User u : allPlayers) {
+                  u.denyCard(ru, wName);
+                }
+              }
+            }
+            for (int i = 0; i < ROOM_NAMES.length; i++) {
+              String rName = clean(ROOM_NAMES[i]);
+              if (!rrCards.contains(rName)) {
+                for (User u : allPlayers) {
+                  u.denyCard(ru, rName);
+                }
+              }
+            }
             break;
-          case 3: //Check My Score Card
+          case 3: // Check My Score Card
             p1.printScoreCard();
             break;
-          case 4: //Check My Idea of An Opponent's Score Card
+          case 4: // Check My Idea of An Opponent's Score Card
             String opName = null;
             while (opName == null) {
               System.out.print("Enter opponent name: ");
@@ -333,14 +406,14 @@ public class Runner {
             }
             getUser(opName).printScoreCard();
             break;
-          case 5: //Eval Accusation Probability
+          case 5: // Eval Accusation Probability
             break;
-          case 6: //Suggest Useful Rumor
+          case 6: // Suggest Useful Rumor
             break;
-          case 7: //Output Score Card to File
-            p1.printScoreCardToFile();
+          case 7: // End Game
+            gameOver = true;
             break;
-          case 8: //End Game and Output Score Card
+          case 8: // End Game and Output Score Card
             gameOver = true;
             p1.printScoreCardToFile();
             break;
@@ -365,7 +438,7 @@ public class Runner {
   }
 
   private static void printConsoleOptions() {
-    System.out.println("What Would You Like To Do?");
+    System.out.println("What Would You Like To Do (Choose Number)?");
     for (int i = 0; i < CONSOLE_OPTIONS.length; i++) {
       System.out.println("" + (i + 1) + ": " + CONSOLE_OPTIONS[i]);
     }
@@ -397,6 +470,9 @@ public class Runner {
 
   private static String[] scanNames() {
     String nameStr = scanStr();
+    if (nameStr.isBlank()) {
+      return new String[]{};
+    }
     String[] names = nameStr.split(",");
     for (int i = 0; i < names.length; i++) {
       if (!allNames.contains(names[i])) {

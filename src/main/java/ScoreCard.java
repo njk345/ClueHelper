@@ -2,6 +2,7 @@ import de.vandermeer.asciitable.AsciiTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,15 +50,23 @@ public class ScoreCard {
     }
   }
 
+  public void addCard(String toWhom, String card) {
+    vals.get(card).replace(toWhom, true);
+  }
+
   /**
    * A method to assign a list of cards to a user.
    * @param toWhom A username
    * @param cards A list of string card names
    */
-  public void addCards(String toWhom, List<String> cards) {
+  public void addCards(String toWhom, Collection<String> cards) {
     for (String c : cards) {
-      vals.get(c).replace(toWhom, true);
+      addCard(toWhom, c);
     }
+  }
+
+  public void denyCard(String fromWhom, String card) {
+    vals.get(card).replace(fromWhom, false);
   }
 
   /**
@@ -65,10 +74,20 @@ public class ScoreCard {
    * @param fromWhom A username
    * @param cards A list of string card names
    */
-  public void denyCards(String fromWhom, List<String> cards) {
+  public void denyCards(String fromWhom, Collection<String> cards) {
     for (String c : cards) {
-      vals.get(c).replace(fromWhom, false);
+      denyCard(fromWhom, c);
     }
+  }
+
+  /**
+   * Determines if a user has been assigned a given card in this score card.
+   * @param user A username
+   * @param card A card name
+   * @return True, if user has been assigned card, False if not
+   */
+  public Boolean hasCard(String user, String card) {
+    return vals.get(card).get(user);
   }
 
   /**
