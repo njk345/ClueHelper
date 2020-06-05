@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Created by njk on 7/9/16.
@@ -51,7 +50,14 @@ public class ScoreCard {
   }
 
   public void addCard(String toWhom, String card) {
-    vals.get(card).replace(toWhom, true);
+    /* When a card is assigned to a person, deny it to every other person. */
+    for (String player : vals.get(card).keySet()) {
+      if (player.equals(toWhom)) {
+        vals.get(card).replace(player, true);
+      } else {
+        vals.get(card).replace(player, false);
+      }
+    }
   }
 
   /**
@@ -95,13 +101,13 @@ public class ScoreCard {
    * assigns the disproval card, if there is one, to the disprover.
    * @param r A rumor
    */
-  public void noteRumor(Rumor r) {
+  public void noteRumor(Rumor r, boolean sawDisproval) {
     for (String p : r.getNonDisprovals()) { // note all non-disproving players to not have any of the rumor cards
       denyCards(p, Arrays.asList(r.getPerson(), r.getWeapon(), r.getRoom()));
     }
-    if (r.getDisproval() != null && r.getDisproval()[1] != null) {
+    if (sawDisproval && r.getDisproval() != null && r.getDisproval()[1] != null) {
       /* If someone disproved, note them to have their disproving card */
-      vals.get(r.getDisproval()[1]).put(r.getDisproval()[0], true);
+      addCard(r.getDisproval()[0], r.getDisproval()[1]);
     }
   }
 

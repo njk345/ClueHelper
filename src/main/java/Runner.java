@@ -118,10 +118,6 @@ public class Runner {
     List<String> pCards = personIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
     /* Assign chosen cards to p1 */
     p1.addCards(p1Name, pCards);
-    for (String n : otherNames) {
-      /* From p1's perspective, deny all other players p1's cards */
-      p1.denyCards(n, pCards);
-    }
 
     List<Integer> nonPIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
     nonPIndices.removeAll(personIndices);
@@ -142,9 +138,6 @@ public class Runner {
     }
     List<String> wCards = weaponIndices.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
     p1.addCards(p1Name, wCards);
-    for (String n : otherNames) {
-      p1.denyCards(n, wCards);
-    }
 
     List<Integer> nonWIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
     nonWIndices.removeAll(weaponIndices);
@@ -162,9 +155,6 @@ public class Runner {
     }
     List<String> rCards = roomIndices.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
     p1.addCards(p1Name, rCards);
-    for (String n : otherNames) {
-      p1.denyCards(n, rCards);
-    }
 
     List<Integer> nonRIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
     nonRIndices.removeAll(roomIndices);
@@ -194,8 +184,6 @@ public class Runner {
               }
             }
 
-            gap();
-
             String person = null;
             while (person == null) {
               System.out.print("Enter rumored person: ");
@@ -204,7 +192,6 @@ public class Runner {
                 person = null;
               }
             }
-            gap();
 
             String weapon = null;
             while (weapon == null) {
@@ -214,7 +201,6 @@ public class Runner {
                 weapon = null;
               }
             }
-            gap();
 
             String room = null;
             while (room == null) {
@@ -224,7 +210,6 @@ public class Runner {
                 room = null;
               }
             }
-            gap();
 
             String[] ndpNames = null;
             while (ndpNames == null) {
@@ -258,19 +243,19 @@ public class Runner {
                     dpCard = null;
                   }
                 }
+
+                /* Error checking */
+                if (p1.getScoreCard().hasCard(dpName, dpCard) != null &&
+                    !p1.getScoreCard().hasCard(dpName, dpCard)) {
+                  System.out.println("Someone else has already been assigned " + dpCard);
+                  break;
+                }
               }
               disproval[0] = dpName;
               disproval[1] = dpCard;
-
-              /* Error checking */
-              if (p1.getScoreCard().hasCard(dpName, dpCard) != null &&
-                  !p1.getScoreCard().hasCard(dpName, dpCard)) {
-                System.out.println("Someone else has already been assigned " + dpCard);
-                break;
-              }
             }
 
-            Rumor rumor = new Rumor(person, weapon, room, ndpNames, disproval);
+            Rumor rumor = new Rumor(asker, person, weapon, room, ndpNames, disproval);
             for (User p : allPlayers) {
               p.noteRumor(rumor);
             }
@@ -359,11 +344,6 @@ public class Runner {
             for (Set<String> revealedCardList : revealedCardLists) {
               for (User u : allPlayers) {
                 u.addCards(ru, revealedCardList);
-                for (String n : allNames) {
-                  if (!n.equals(ru)) {
-                    u.denyCards(n, revealedCardList);
-                  }
-                }
               }
             }
             /* Deny every card not revealed to the losing player */
@@ -459,7 +439,7 @@ public class Runner {
     return clean(SCAN.nextLine());
   }
 
-  private static String clean(String s) {
+  public static String clean(String s) {
     return s.replaceAll("\\s", "").toLowerCase();
   }
 

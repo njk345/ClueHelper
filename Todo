@@ -13,3 +13,4 @@
     - Enum for noting values
     - cleaner loops and less repetition in runner
 
+- When card assigned during answer to a rumor, deny it to all other players

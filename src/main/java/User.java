@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 public class User {
   private ScoreCard scoreCard;
@@ -46,7 +45,10 @@ public class User {
   }
 
   public void noteRumor(Rumor r) {
-    scoreCard.noteRumor(r);
+    /* Note the rumor and only show the revealed card to the user if they asked or answered the rumor */
+    boolean sawDisproval = Runner.clean(name).equals(r.getAsker()) ||
+        Runner.clean(name).equals(r.getDisproval()[0]);
+    scoreCard.noteRumor(r, sawDisproval);
   }
 
   public void printScoreCard() {

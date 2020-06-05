@@ -2,6 +2,7 @@
  * Created by njk on 7/9/16.
  */
 public class Rumor {
+  private String asker;
   private String person;
   private String weapon;
   private String room;
@@ -11,7 +12,8 @@ public class Rumor {
      disproved with. If no one could disprove, disproval is null. */
   private String[] disproval;
 
-  public Rumor(String person, String weapon, String room, String[] nonDisprovals, String[] disproval) {
+  public Rumor(String asker, String person, String weapon, String room, String[] nonDisprovals, String[] disproval) {
+    this.asker = asker;
     this.person = person;
     this.weapon = weapon;
     this.room = room;
@@ -20,6 +22,9 @@ public class Rumor {
   }
 
   /* Getters and Setters */
+  public String getAsker() {
+    return asker;
+  }
   public String getPerson() {
     return person;
   }
