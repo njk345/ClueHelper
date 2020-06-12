@@ -4,16 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by njk on 7/9/16.
  */
 public class ScoreCard {
   /**
-   * A hash map from strings holding card names to hash maps from strings holding player names to booleans
-   * indicating whether I know that player has that card.
+   * A hash map from strings holding card names to hash maps from strings holding player names to
+   * booleans indicating whether I know that player has that card.
    */
-  private HashMap<String, HashMap<String, Boolean>> vals;
+  private Map<String, HashMap<String, Boolean>> vals;
+  /**
+   * Sets to store which persons, weapons, and rooms could still be in the envelope.
+   */
+  private Set<String> personsLeft, weaponsLeft, roomsLeft;
 
   /**
    * A string indicating the player whose scorecard this is.
@@ -25,27 +32,34 @@ public class ScoreCard {
    */
   public ScoreCard() {
     this.vals = new HashMap<>();
-    /* Make the keys for vals the no-whitespace, lower-case card names that are the keys in pSet, wSet, rSet */
+    this.personsLeft = new HashSet<>();
+    this.weaponsLeft = new HashSet<>();
+    this.roomsLeft = new HashSet<>();
+    /* Make the keys for vals the no-whitespace, lower-case card names that are the keys in
+    pSet, wSet, rSet */
     for (String p : Runner.pSet.keySet()) {
       vals.put(p, new HashMap<>());
       vals.get(p).put(Runner.p1Name, null);
       for (String n : Runner.otherNames) {
         vals.get(p).put(n, null);
       }
+      personsLeft.add(p);
     }
-    for (String p : Runner.wSet.keySet()) {
-      vals.put(p, new HashMap<>());
-      vals.get(p).put(Runner.p1Name, null);
+    for (String w : Runner.wSet.keySet()) {
+      vals.put(w, new HashMap<>());
+      vals.get(w).put(Runner.p1Name, null);
       for (String n : Runner.otherNames) {
-        vals.get(p).put(n, null);
+        vals.get(w).put(n, null);
       }
+      weaponsLeft.add(w);
     }
-    for (String p : Runner.rSet.keySet()) {
-      vals.put(p, new HashMap<>());
-      vals.get(p).put(Runner.p1Name, null);
+    for (String r : Runner.rSet.keySet()) {
+      vals.put(r, new HashMap<>());
+      vals.get(r).put(Runner.p1Name, null);
       for (String n : Runner.otherNames) {
-        vals.get(p).put(n, null);
+        vals.get(r).put(n, null);
       }
+      roomsLeft.add(r);
     }
   }
 
@@ -57,6 +71,17 @@ public class ScoreCard {
       } else {
         vals.get(card).replace(player, false);
       }
+    }
+    CardType cardType = Runner.getCardType(card);
+    switch (cardType) {
+      case PERSON:
+        personsLeft.remove(card);
+        break;
+      case WEAPON:
+        weaponsLeft.remove(card);
+        break;
+      case ROOM:
+        roomsLeft.remove(card);
     }
   }
 

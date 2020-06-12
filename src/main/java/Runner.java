@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,12 +20,13 @@ public class Runner {
       "Print My Score Card", "Print An Opponent's Score Card", "Calculate Accusation Probability",
       "Suggest Useful Rumor", "End Game", "End Game & Print My Score Card to File"};
   static final Scanner SCAN = new Scanner(System.in);
-  static HashMap<String, Integer> pSet;
-  static HashMap<String, Integer> wSet;
-  static HashMap<String, Integer> rSet;
+  static Map<String, Integer> pSet;
+  static Map<String, Integer> wSet;
+  static Map<String, Integer> rSet;
+  private static Map<String, CardType> cardTypes;
   static String p1Name;
-  static ArrayList<String> otherNames;
-  static ArrayList<String> allNames;
+  static List<String> otherNames;
+  static List<String> allNames;
   static User p1;
   static User[] opponents;
   static User[] allPlayers; // array with p1 at index 0 and opponents after
@@ -35,15 +37,27 @@ public class Runner {
     e.g. (colonelmustard, 0), (knife, 1), (mr.green, 3) */
     pSet = new HashMap<>();
     for (int i = 0; i < PERSON_NAMES.length; i++) {
-      pSet.put(PERSON_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
+      pSet.put(clean(PERSON_NAMES[i]), i);
     }
     wSet = new HashMap<>();
     for (int i = 0; i < WEAPON_NAMES.length; i++) {
-      wSet.put(WEAPON_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
+      wSet.put(clean(WEAPON_NAMES[i]), i);
     }
     rSet = new HashMap<>();
     for (int i = 0; i < ROOM_NAMES.length; i++) {
-      rSet.put(ROOM_NAMES[i].replaceAll("\\s", "").toLowerCase(), i);
+      rSet.put(clean(ROOM_NAMES[i]), i);
+    }
+
+    cardTypes = new HashMap<>();
+    /* Associate names of cards with their CardType */
+    for (String person: pSet.keySet()) {
+      cardTypes.put(person, CardType.PERSON);
+    }
+    for (String weapon: wSet.keySet()) {
+      cardTypes.put(weapon, CardType.WEAPON);
+    }
+    for (String room: rSet.keySet()) {
+      cardTypes.put(room, CardType.ROOM);
     }
 
     System.out.println("Welcome to ClueHelper!\n");
@@ -115,14 +129,16 @@ public class Runner {
       personIndices = scanIntSelections(PERSON_NAMES.length);
     }
     /* Maps indices selected to card names, and makes a list of player card names selected */
-    List<String> pCards = personIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
+    List<String> pCards = personIndices.stream().map(i -> clean(PERSON_NAMES[i]))
+        .collect(Collectors.toList());
     /* Assign chosen cards to p1 */
     p1.addCards(p1Name, pCards);
 
     List<Integer> nonPIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
     nonPIndices.removeAll(personIndices);
 
-    List<String> nonPCards = nonPIndices.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toList());
+    List<String> nonPCards = nonPIndices.stream().map(i -> clean(PERSON_NAMES[i]))
+        .collect(Collectors.toList());
     /* Deny p1 the cards they did not assign their self */
     p1.denyCards(p1Name, nonPCards);
 
@@ -136,13 +152,15 @@ public class Runner {
       printArray(WEAPON_NAMES);
       weaponIndices = scanIntSelections(WEAPON_NAMES.length);
     }
-    List<String> wCards = weaponIndices.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
+    List<String> wCards = weaponIndices.stream().map(i -> clean(WEAPON_NAMES[i]))
+        .collect(Collectors.toList());
     p1.addCards(p1Name, wCards);
 
     List<Integer> nonWIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
     nonWIndices.removeAll(weaponIndices);
 
-    List<String> nonWCards = nonWIndices.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toList());
+    List<String> nonWCards = nonWIndices.stream().map(i -> clean(WEAPON_NAMES[i]))
+        .collect(Collectors.toList());
     p1.denyCards(p1Name, nonWCards);
 
     gap();
@@ -153,13 +171,15 @@ public class Runner {
       printArray(ROOM_NAMES);
       roomIndices = scanIntSelections(ROOM_NAMES.length);
     }
-    List<String> rCards = roomIndices.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
+    List<String> rCards = roomIndices.stream().map(i -> clean(ROOM_NAMES[i]))
+        .collect(Collectors.toList());
     p1.addCards(p1Name, rCards);
 
     List<Integer> nonRIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
     nonRIndices.removeAll(roomIndices);
 
-    List<String> nonRCards = nonRIndices.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toList());
+    List<String> nonRCards = nonRIndices.stream().map(i -> clean(ROOM_NAMES[i]))
+        .collect(Collectors.toList());
     p1.denyCards(p1Name, nonRCards);
 
     gap();
@@ -218,7 +238,7 @@ public class Runner {
             }
 
             String[] disproval = null;
-            if (ndpNames.length < allPlayers.length - 1) { // if not everyone couldn't disprove, someone must have disproved
+            if (ndpNames.length < allPlayers.length - 1) {
               disproval = new String[2];
               String dpName = null;
               while (dpName == null) {
@@ -408,6 +428,9 @@ public class Runner {
     }
   }
 
+  public static CardType getCardType(String card) {
+    return cardTypes.get(card);
+  }
   private static User getUser(String name) {
     for (User r : opponents) {
       if (r.getName().equals(name)) {
