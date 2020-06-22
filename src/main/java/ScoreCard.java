@@ -125,6 +125,7 @@ public class ScoreCard {
    * Notes the contents of a rumor. Makes all players who couldn't disprove not have the cards and
    * assigns the disproval card, if there is one, to the disprover.
    * @param r A rumor
+   * @param sawDisproval Whether the asker saw which card disproved the rumor
    */
   public void noteRumor(Rumor r, boolean sawDisproval) {
     for (String p : r.getNonDisprovals()) { // note all non-disproving players to not have any of the rumor cards
@@ -134,6 +135,18 @@ public class ScoreCard {
       /* If someone disproved, note them to have their disproving card */
       addCard(r.getDisproval()[0], r.getDisproval()[1]);
     }
+  }
+
+  public Set<String> getPersonsLeft() {
+    return personsLeft;
+  }
+
+  public Set<String> getWeaponsLeft() {
+    return weaponsLeft;
+  }
+
+  public Set<String> getRoomsLeft() {
+    return roomsLeft;
   }
 
   /**

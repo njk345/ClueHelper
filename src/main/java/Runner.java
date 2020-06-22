@@ -30,8 +30,10 @@ public class Runner {
   static User p1;
   static User[] opponents;
   static User[] allPlayers; // array with p1 at index 0 and opponents after
+  private static Probability prob;
 
   public static void main(String[] args) {
+    /* ------------ VARIABLE SETUP -------------- */
     /* Populate pSet, wSet, rSet with pairings between no-whitespace, lower-case versions of
     PERSON_NAMES, etc., strings and their integer indices in each String[] -->
     e.g. (colonelmustard, 0), (knife, 1), (mr.green, 3) */
@@ -59,6 +61,8 @@ public class Runner {
     for (String room: rSet.keySet()) {
       cardTypes.put(room, CardType.ROOM);
     }
+
+    /* ------------ REPL SETUP --------------- */
 
     System.out.println("Welcome to ClueHelper!\n");
     System.out.print("How many players are present (2-6)? ");
@@ -183,6 +187,8 @@ public class Runner {
     p1.denyCards(p1Name, nonRCards);
 
     gap();
+
+    prob = new Probability(p1.getScoreCard());
 
     /* ----------- GAME REPL ------------- */
 
@@ -407,6 +413,7 @@ public class Runner {
             getUser(opName).printScoreCard();
             break;
           case 5: // Eval Accusation Probability
+            System.out.println(prob.getNumberSolutions());
             break;
           case 6: // Suggest Useful Rumor
             break;
