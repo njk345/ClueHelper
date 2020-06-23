@@ -1,12 +1,19 @@
-- Registering player losses
-  - Failed Accusations
-    - Register card info in some way, possibly with probability involved
-  - When all players but one removed, end the game
+- When all players but one removed, end the game
 
 - Probability handling
     - Rumor disproval partial probabilities
     - Failed accusations partial probabilities
     - Repeated rumor narrowing down (partial probs)
+
+    - Maybe just run simulations and tally likelihoods of each outcome ***
+
+- Bugs:
+    - When one person asked a rumor and no one could disprove, there was a null pointer exception
+    - Once a person has lost, shouldnt have to include them in non-disprovals for future rumors
+
+- Improvements:
+    - Make entering rumor names faster --> maybe have number list
+    - Add crosses or check marks to scorecard to see what's eliminated
 
 - Cleaning up code
     - Dont use lower case no spaces stuff in hashmaps

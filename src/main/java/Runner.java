@@ -12,10 +12,14 @@ public class Runner {
   static final int MIN_PLAYERS = 2, MAX_PLAYERS = 6;
   static final String[] PERSON_NAMES = {"Colonel Mustard", "Miss Scarlet", "Professor Plum",
       "Mr. Green", "Mrs. White", "Mrs. Peacock"};
-  static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Lead pipe", "Revolver", "Rope",
+  static final String[] WEAPON_NAMES_2 = {"Candlestick", "Knife", "Lead pipe", "Revolver", "Rope",
       "Wrench"};
-  static final String[] ROOM_NAMES = {"Kitchen", "Ballroom", "Conservatory", "Dining Room",
+  static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Pistol", "Rope", "Poison", "Trophy", "Bat", "Ax", "Dumbbell"};
+
+  static final String[] ROOM_NAMES_2 = {"Kitchen", "Ballroom", "Conservatory", "Dining Room",
       "Billiard Room", "Library", "Lounge", "Hall", "Study"};
+  static final String[] ROOM_NAMES = {"Kitchen", "Patio", "Spa", "Theater",
+      "Living Room", "Observatory", "Hall", "Guest House", "Dining Room"};
   static final String[] CONSOLE_OPTIONS = {"Register Rumor", "Register Player Loss",
       "Print My Score Card", "Print An Opponent's Score Card", "Calculate Accusation Probability",
       "Suggest Useful Rumor", "End Game", "End Game & Print My Score Card to File"};
@@ -160,7 +164,7 @@ public class Runner {
         .collect(Collectors.toList());
     p1.addCards(p1Name, wCards);
 
-    List<Integer> nonWIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
+    List<Integer> nonWIndices = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
     nonWIndices.removeAll(weaponIndices);
 
     List<String> nonWCards = nonWIndices.stream().map(i -> clean(WEAPON_NAMES[i]))
