@@ -46,8 +46,8 @@ public class User {
 
   public void noteRumor(Rumor r) {
     /* Note the rumor and only show the revealed card to the user if they asked or answered the rumor */
-    boolean sawDisproval = Runner.clean(name).equals(r.getAsker()) ||
-        Runner.clean(name).equals(r.getDisproval()[0]);
+    boolean sawDisproval = Runner.clean(name).equals(r.getAsker())
+        || (r.getDisproval() != null && Runner.clean(name).equals(r.getDisproval()[0]));
     scoreCard.noteRumor(r, sawDisproval);
   }
 
