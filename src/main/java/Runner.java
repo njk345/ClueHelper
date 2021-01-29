@@ -14,8 +14,8 @@ public class Runner {
       "Mr. Green", "Mrs. White", "Mrs. Peacock"};
   static final String[] WEAPON_NAMES_2 = {"Candlestick", "Knife", "Lead pipe", "Revolver", "Rope",
       "Wrench"};
-  static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Pistol", "Rope", "Poison", "Trophy", "Bat", "Ax", "Dumbbell"};
-
+  static final String[] WEAPON_NAMES = {"Candlestick", "Knife", "Pistol", "Rope", "Poison", "Trophy",
+      "Bat", "Ax", "Dumbbell"};
   static final String[] ROOM_NAMES_2 = {"Kitchen", "Ballroom", "Conservatory", "Dining Room",
       "Billiard Room", "Library", "Lounge", "Hall", "Study"};
   static final String[] ROOM_NAMES = {"Kitchen", "Patio", "Spa", "Theater",
@@ -56,13 +56,13 @@ public class Runner {
 
     cardTypes = new HashMap<>();
     /* Associate names of cards with their CardType */
-    for (String person: pSet.keySet()) {
+    for (String person : pSet.keySet()) {
       cardTypes.put(person, CardType.PERSON);
     }
-    for (String weapon: wSet.keySet()) {
+    for (String weapon : wSet.keySet()) {
       cardTypes.put(weapon, CardType.WEAPON);
     }
-    for (String room: rSet.keySet()) {
+    for (String room : rSet.keySet()) {
       cardTypes.put(room, CardType.ROOM);
     }
 
@@ -309,7 +309,7 @@ public class Runner {
 
             Set<String> rpCards = personRevealed.stream().map(i -> clean(PERSON_NAMES[i])).collect(Collectors.toSet());
             boolean problem1 = false;
-            for (String rpc: rpCards) {
+            for (String rpc : rpCards) {
               if (p1.getScoreCard().hasCard(ru, rpc) != null &&
                   !p1.getScoreCard().hasCard(ru, rpc)) {
                 System.out.println("Someone else has already been assigned " + rpc);
@@ -330,7 +330,7 @@ public class Runner {
 
             Set<String> rwCards = weaponRevealed.stream().map(i -> clean(WEAPON_NAMES[i])).collect(Collectors.toSet());
             boolean problem2 = false;
-            for (String rwc: rwCards) {
+            for (String rwc : rwCards) {
               if (p1.getScoreCard().hasCard(ru, rwc) != null &&
                   !p1.getScoreCard().hasCard(ru, rwc)) {
                 System.out.println("Someone else has already been assigned " + rwc);
@@ -351,7 +351,7 @@ public class Runner {
 
             Set<String> rrCards = roomRevealed.stream().map(i -> clean(ROOM_NAMES[i])).collect(Collectors.toSet());
             boolean problem3 = false;
-            for (String rrc: rrCards) {
+            for (String rrc : rrCards) {
               if (p1.getScoreCard().hasCard(ru, rrc) != null &&
                   !p1.getScoreCard().hasCard(ru, rrc)) {
                 System.out.println("Someone else has already been assigned " + rrc);
@@ -442,6 +442,7 @@ public class Runner {
   public static CardType getCardType(String card) {
     return cardTypes.get(card);
   }
+
   private static User getUser(String name) {
     for (User r : opponents) {
       if (r.getName().equals(name)) {

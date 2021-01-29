@@ -8,7 +8,6 @@
     - Maybe just run simulations and tally likelihoods of each outcome ***
 
 - Bugs:
-    - When one person asked a rumor and no one could disprove, there was a null pointer exception
     - Once a person has lost, shouldnt have to include them in non-disprovals for future rumors
 
 - Improvements:
